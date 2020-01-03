@@ -1,0 +1,96 @@
+cef (78.3.4+ge17bba6-0.5) eoan; urgency=medium
+
+  * fix install location for debug libs
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Tue, 17 Dec 2019 07:23:01 +0100
+
+cef (78.3.4+ge17bba6-0.4) eoan; urgency=medium
+
+  * rebuild 
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Sat, 14 Dec 2019 14:34:57 +0100
+
+cef (78.3.4+ge17bba6-0.3) eoan; urgency=medium
+
+  * try to create debug packages
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Sat, 14 Dec 2019 13:29:01 +0100
+
+cef (78.3.4+ge17bba6-0.2) eoan; urgency=medium
+
+  * add missing icudtl.dat
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Sat, 23 Nov 2019 17:44:19 +0100
+
+cef (78.3.4+ge17bba6-0.1) eoan; urgency=medium
+
+  * CEF 78.3.4+ge17bba6+chromium-78.0.3904.108
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Sat, 23 Nov 2019 13:32:25 +0100
+
+cef (3.3578.1867.g0f6d65a-4) cosmic; urgency=medium
+
+  * adjust depends for CEF version
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Wed, 30 Jan 2019 20:06:17 +0100
+
+cef (3.3578.1867.g0f6d65a-3) cosmic; urgency=medium
+
+  * add patch fix-cfi-icall-attribute
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Wed, 30 Jan 2019 19:30:46 +0100
+
+cef (3.3578.1867.g0f6d65a-2) cosmic; urgency=medium
+
+  * remove libwidevinecdmadapter.so
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Wed, 30 Jan 2019 06:44:29 +0100
+
+cef (3.3578.1867.g0f6d65a-1) cosmic; urgency=medium
+
+  * new CEF version 3.3578.1867.g0f6d65a, chromium version 71
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Tue, 29 Jan 2019 19:21:50 +0100
+
+cef (3.3282.1732.g973997f-7) cosmic; urgency=medium
+
+  * add one more symlink for include dir
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Thu, 29 Nov 2018 07:24:07 +0100
+
+cef (3.3282.1732.g973997f-6) cosmic; urgency=medium
+
+  * rebuild with fixed patchelf 
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Thu, 25 Oct 2018 06:29:08 +0200
+
+cef (3.3282.1732.g973997f-5) cosmic; urgency=medium
+
+  * try to fix include dirs
+  * build only amd64
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Wed, 24 Oct 2018 06:46:11 +0200
+
+cef (3.3282.1732.g973997f-4) cosmic; urgency=medium
+
+  * add one more depend
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Tue, 23 Oct 2018 07:23:47 +0200
+
+cef (3.3282.1732.g973997f-3) cosmic; urgency=medium
+
+  * add more build depends
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Tue, 23 Oct 2018 07:00:46 +0200
+
+cef (3.3282.1732.g973997f-2) cosmic; urgency=medium
+
+  * try with more libs in build env for depends
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Sun, 21 Oct 2018 18:00:02 +0200
+
+cef (3.3282.1732.g973997f-1) cosmic; urgency=medium
+
+  * initial release
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Sat, 20 Oct 2018 18:08:28 +0200

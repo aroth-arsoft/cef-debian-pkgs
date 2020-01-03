@@ -1,0 +1,39 @@
+CEF for Debian
+-------------
+
+Even though CEF upstream only builds as a shared library (libcef.so),
+it does not explicitly version its ABI (there are no versions in its soname),
+and also cannot get many of its shared resources from anywhere except the same
+directory as the executable. Generally, applications are expected to embed the
+library and its resources; however, this is at odds with how most libraries in
+Debian work, so we have to apply some workarounds.
+
+The current recommendation for a package building against CEF in Debian is
+to link with rpath $ORIGIN, and then symlink libcef.so and the resources into
+the same directory as the executable. (See the upstream README for which files
+you need to include, although upstream would expect you to copy the files
+instead of symlinking them.)
+
+CEF computes an ABI marker as a hash, which the Debian package exports as a
+virtual Provides (e.g. libcef-abcdefab) and also puts in the shlibs file.
+This makes your package automatically depend on said library package when
+you link against libcef.so, which in turn means it is not possible to get ABI
+skew without detecting it. However, it also means that whenever CEF changes in
+an ABI-incompatible way, you will need to rebuild your package (typically using
+a binary NMU) -- it's not possible to have multiple versions of libcef
+installed at the same time. This is the same strategy used for non-C languages
+that don't have versioned sonames.
+
+CEF internally uses a C ABI and then has a C++ wrapper, libcef_dll_wrapper,
+which is customarily built by the application, since on Windows, you need to
+link debug-built executables against debug-built libcef_dll_wrapper (there
+are separate debug/release C libraries, and also DLL vs. non-DLL etc.).
+Since this does not apply on Debian, libcef-dev ships a prebuilt
+libcef_dll_wrapper that you can use. However, in order not to interfere with
+packages that expect to built the library itself, it also ships the source
+code.
+
+Debian's Chromium packages do not build nor need icudtl.dat, and thus,
+CEF follows suit.
+
+ -- Steinar H. Gunderson <sesse@debian.org>  Sat, 10 Mar 2018 10:49:14 +0100

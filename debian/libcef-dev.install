@@ -1,0 +1,6 @@
+#!/usr/bin/dh-exec
+usr/include/* usr/include/${DEB_BUILD_MULTIARCH}/cef
+usr/src/cef/CMakeLists.txt /usr/src/cef/
+usr/src/cef/cmake/* usr/src/cef/cmake/
+usr/src/cef/libcef_dll/* /usr/src/cef/libcef_dll/
+usr/lib/libcef_dll_wrapper.a usr/lib/${DEB_BUILD_MULTIARCH}/

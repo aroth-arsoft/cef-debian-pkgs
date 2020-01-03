@@ -1,0 +1,60 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+PKG_VERSION := $(shell dpkg-parsechangelog -S Version)
+PKG_DISTRIBUTION := $(shell dpkg-parsechangelog -S Distribution)
+ifeq ($(PKG_DISTRIBUTION),UNRELEASED)
+	PKG_DISTRIBUTION := $(shell lsb_release -cs)
+endif
+
+CMAKE_BUILD_TYPE = Release
+
+# Set the appropriate CPU architecture.
+DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+ifeq (i386,$(DEB_HOST_ARCH))
+defines+=host_cpu=\"x86\"
+CEF_ARCH=x86
+endif
+ifeq (amd64,$(DEB_HOST_ARCH))
+defines+=host_cpu=\"x64\"
+CEF_ARCH=x64
+DISTRIB_ARGS=--x64-build
+endif
+ifeq (armhf,$(DEB_HOST_ARCH))
+defines+=host_cpu=\"arm\" arm_use_neon=false
+CEF_ARCH=arm
+DISTRIB_ARGS=--arm-build
+endif
+
+# Handle parallel build options.
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+njobs=-j$(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+endif
+
+%:
+	 dh $@ --buildsystem=cmake
+
+override_dh_clean:
+	dh_clean
+	-rm -f Debug/libcefd.so
+	-rm -rf build
+
+override_dh_auto_configure:
+	dh_auto_configure --buildsystem=cmake -- \
+		-DPKG_DISTRIBUTION=$(PKG_DISTRIBUTION) \
+		-DPKG_VERSION=$(PKG_VERSION)
+
+# Regular shlibs won't work for libcef.so, since it has no versions in its soname,
+# so we simply make a symbols file mapping every symbol to libcef-abi-$HASH (unversioned).
+override_dh_makeshlibs:
+	CEF_ABI=`grep -A 2 OS_LINUX include/cef_version.h | sed -n 's/#define CEF_API_HASH_PLATFORM "\([0-9a-f]\{8\}\).*/\1/p'`; echo "libcef.so libcef-abi-$$CEF_ABI" > debian/libcef.symbols
+	echo ' (regex)".*" 0' >> debian/libcef.symbols
+	CEF_ABI=`grep -A 2 OS_LINUX include/cef_version.h | sed -n 's/#define CEF_API_HASH_PLATFORM "\([0-9a-f]\{8\}\).*/\1/p'`; echo "libcefd.so libcef-abi-$$CEF_ABI" > debian/libcefd.symbols
+	echo ' (regex)".*" 0' >> debian/libcefd.symbols
+	dh_makeshlibs -XlibEGL.so -XlibGLESv2.so
+
+override_dh_gencontrol:
+	CEF_ABI=`grep -A 2 OS_LINUX include/cef_version.h | sed -n 's/#define CEF_API_HASH_PLATFORM "\([0-9a-f]\{8\}\).*/\1/p'`; dh_gencontrol -- -Vcef:ABI=$$CEF_ABI

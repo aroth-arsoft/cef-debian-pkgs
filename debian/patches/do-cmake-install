@@ -1,0 +1,134 @@
+--- /dev/null
++++ b/cef_install.cmake
+@@ -0,0 +1,111 @@
++FUNCTION(CEF_GENERATE_DEBUG_LIB)
++
++    set(CEF_DIR ${CMAKE_SOURCE_DIR})
++    IF(NOT EXISTS ${CEF_DIR}/Debug/libcefd.so AND EXISTS ${CEF_DIR}/Debug/libcef.so)
++        FILE(COPY ${CEF_DIR}/Debug/libcef.so DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
++        FILE(RENAME ${CMAKE_CURRENT_BINARY_DIR}/libcef.so ${CEF_DIR}/Debug/libcefd.so)
++        execute_process(COMMAND "patchelf" --set-soname libcefd.so ${CEF_DIR}/Debug/libcefd.so
++                        WORKING_DIRECTORY ${CEF_DIR}/Debug
++                        RESULT_VARIABLE _patchelf_result
++                        OUTPUT_VARIABLE _patchelf_output
++                        )
++    ENDIF()
++
++ENDFUNCTION(CEF_GENERATE_DEBUG_LIB)
++
++FUNCTION(CEF_INSTALL_FILES)
++    set(CEF_DIR ${CMAKE_SOURCE_DIR})
++    SET(_cef_lib_dir ${CMAKE_BINARY_DIR}/lib)
++    set(_cef_res_dir ${CEF_DIR}/Resources)
++    set(_cef_rel_dir ${CEF_DIR}/Release)
++    set(_cef_dbg_dir ${CEF_DIR}/Debug)
++    set(_cef_src_dir ${CEF_DIR}/libcef_dll)
++    set(_cef_cmake_dir ${CEF_DIR}/cmake)
++
++    install(DIRECTORY ${CEF_DIR}/include DESTINATION .)
++    install(FILES ${_cef_rel_dir}/libcef.so ${_cef_dbg_dir}/libcefd.so DESTINATION lib)
++
++    install(FILES
++        ${_cef_rel_dir}/libEGL.so
++        ${_cef_rel_dir}/libGLESv2.so
++        # Only required for setuid sandboxes
++        # See https://code.google.com/p/chromium/wiki/LinuxSandboxing#The_setuid_sandbox
++        ${_cef_rel_dir}/chrome-sandbox
++        ${_cef_rel_dir}/natives_blob.bin
++        ${_cef_rel_dir}/snapshot_blob.bin
++        ${_cef_rel_dir}/v8_context_snapshot.bin
++        DESTINATION lib/cef.rel
++        )
++    install(FILES
++        ${_cef_rel_dir}/swiftshader/libEGL.so
++        ${_cef_rel_dir}/swiftshader/libGLESv2.so
++        DESTINATION lib/cef.rel/swiftshader
++        )
++
++    install(FILES
++        ${_cef_dbg_dir}/libEGL.so
++        ${_cef_dbg_dir}/libGLESv2.so
++        # Only required for setuid sandboxes
++        # See https://code.google.com/p/chromium/wiki/LinuxSandboxing#The_setuid_sandbox
++        ${_cef_dbg_dir}/chrome-sandbox
++        ${_cef_dbg_dir}/natives_blob.bin
++        ${_cef_dbg_dir}/snapshot_blob.bin
++        ${_cef_dbg_dir}/v8_context_snapshot.bin
++        DESTINATION lib/cef.dbg
++        )
++    install(FILES
++        ${_cef_dbg_dir}/swiftshader/libEGL.so
++        ${_cef_dbg_dir}/swiftshader/libGLESv2.so
++        DESTINATION lib/cef.dbg/swiftshader
++        )
++
++    install(FILES
++                ${_cef_res_dir}/cef.pak
++                ${_cef_res_dir}/cef_100_percent.pak
++                ${_cef_res_dir}/cef_200_percent.pak
++                ${_cef_res_dir}/cef_extensions.pak
++                ${_cef_res_dir}/devtools_resources.pak
++            DESTINATION
++                share/cef/Resources
++            )
++    install(DIRECTORY
++                ${_cef_res_dir}/locales
++            DESTINATION
++                share/cef/Resources
++            )
++
++    install(FILES
++                ${_cef_res_dir}/icudtl.dat
++            DESTINATION
++                lib/cef.rel
++        )
++    install(FILES
++                ${_cef_res_dir}/icudtl.dat
++            DESTINATION
++                lib/cef.dbg
++        )
++    install(DIRECTORY
++                ${_cef_src_dir}
++            DESTINATION
++                src/cef
++            )
++    install(DIRECTORY
++                ${_cef_cmake_dir}
++            DESTINATION
++                src/cef
++            )
++    install(FILES
++                ${CEF_DIR}/CMakeLists.txt
++            DESTINATION
++                src/cef
++            )
++    #message(STATUS "ins ${CMAKE_CURRENT_BINARY_DIR}/libcef_dll_wrapper/libcef_dll_wrapper.a")
++    install(FILES
++                ${CMAKE_CURRENT_BINARY_DIR}/libcef_dll_wrapper/libcef_dll_wrapper.a
++            DESTINATION
++                lib
++        )
++ENDFUNCTION(CEF_INSTALL_FILES)
++
++CEF_GENERATE_DEBUG_LIB()
++CEF_INSTALL_FILES()
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -196,6 +196,7 @@
+ # directory.
+ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
+ 
++if(0)
+ # Include application targets.
+ # Comes from the <target>/CMakeLists.txt file in the current directory.
+ # TODO: Change these lines to match your project target when you copy this file.
+@@ -208,6 +209,9 @@
+ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/cefclient")
+   add_subdirectory(tests/cefclient)
+ endif()
++endif()
+ 
+ # Display configuration settings.
+ PRINT_CEF_CONFIG()
++
++include(cef_install.cmake)
