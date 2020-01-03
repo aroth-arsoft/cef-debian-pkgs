@@ -50,11 +50,11 @@ override_dh_auto_configure:
 # Regular shlibs won't work for libcef.so, since it has no versions in its soname,
 # so we simply make a symbols file mapping every symbol to libcef-abi-$HASH (unversioned).
 override_dh_makeshlibs:
-	CEF_ABI=`grep -A 2 OS_LINUX include/cef_version.h | sed -n 's/#define CEF_API_HASH_PLATFORM "\([0-9a-f]\{8\}\).*/\1/p'`; echo "libcef.so libcef-abi-$$CEF_ABI" > debian/libcef.symbols
+	CEF_ABI=`grep 'define CEF_VERSION_MAJOR' include/cef_version.h | sed -n 's/#define CEF_VERSION_MAJOR \([0-9]\{2,3\}\)/\1/p'`; echo "libcef.so libcef-abi-$$CEF_ABI" > debian/libcef.symbols
 	echo ' (regex)".*" 0' >> debian/libcef.symbols
-	CEF_ABI=`grep -A 2 OS_LINUX include/cef_version.h | sed -n 's/#define CEF_API_HASH_PLATFORM "\([0-9a-f]\{8\}\).*/\1/p'`; echo "libcefd.so libcef-abi-$$CEF_ABI" > debian/libcefd.symbols
+	CEF_ABI=`grep 'define CEF_VERSION_MAJOR' include/cef_version.h | sed -n 's/#define CEF_VERSION_MAJOR \([0-9]\{2,3\}\)/\1/p'`; echo "libcefd.so libcef-abi-$$CEF_ABI" > debian/libcefd.symbols
 	echo ' (regex)".*" 0' >> debian/libcefd.symbols
 	dh_makeshlibs -XlibEGL.so -XlibGLESv2.so
 
 override_dh_gencontrol:
-	CEF_ABI=`grep -A 2 OS_LINUX include/cef_version.h | sed -n 's/#define CEF_API_HASH_PLATFORM "\([0-9a-f]\{8\}\).*/\1/p'`; dh_gencontrol -- -Vcef:ABI=$$CEF_ABI
+	CEF_ABI=`grep 'define CEF_VERSION_MAJOR' include/cef_version.h | sed -n 's/#define CEF_VERSION_MAJOR \([0-9]\{2,3\}\)/\1/p'`; dh_gencontrol -- -Vcef:ABI=$$CEF_ABI
