@@ -1,0 +1,3 @@
+#!/usr/bin/dh-exec
+/usr/include/${DEB_BUILD_MULTIARCH}/cef /usr/src/cef/include
+/usr/include/${DEB_BUILD_MULTIARCH}/cef /usr/include/${DEB_BUILD_MULTIARCH}/cef/include

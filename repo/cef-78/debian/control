@@ -1,0 +1,77 @@
+Source: cef
+Section: libs
+Priority: optional
+Maintainer: Andreas Roth <aroth@arsoft-online.com>
+Build-Depends: debhelper (>= 10), dh-exec, cmake, patchelf,
+ xz-utils,
+ x11-apps,
+ xfonts-base,
+ libgl1-mesa-dev,
+ libglu1-mesa-dev,
+ libegl1-mesa-dev,
+ libgles2-mesa-dev,
+ mesa-common-dev,
+ libxt-dev,
+ libxrandr-dev,
+ libnss3,
+ libnspr4,
+ libxcomposite1,
+ libxi6,
+ libxtst6,
+ libxss1,
+ libgconf-2-4,
+ libasound2,
+ libpangocairo-1.0-0,
+ libpango-1.0-0,
+ libcairo2,
+ libdbus-1-3,
+ libatk1.0-0,
+ libatk-bridge2.0-0,
+ libatspi2.0-0,
+ libcups2
+Standards-Version: 4.1.2
+Homepage: https://bitbucket.org/chromiumembedded/cef/
+
+Package: libcef
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libcefd
+Provides: libcef-abi-${cef:ABI}
+Description: Chromium Embedded Framework
+ Chromium Embedded Framework allows third-party applications to embed
+ the Chromium web browser. CEF insulates the user from the underlying Chromium
+ and Blink code complexity by offering production-quality stable APIs, release
+ branches tracking specific Chromium releases, and binary distributions.
+ Most features in CEF have default implementations that provide rich
+ functionality while requiring little or no integration work from the user.
+ .
+ This package contains the shared library.
+
+Package: libcefd
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libcef
+Provides: libcef-abi-${cef:ABI}
+Description: Chromium Embedded Framework - debug version
+ Chromium Embedded Framework allows third-party applications to embed
+ the Chromium web browser. CEF insulates the user from the underlying Chromium
+ and Blink code complexity by offering production-quality stable APIs, release
+ branches tracking specific Chromium releases, and binary distributions.
+ Most features in CEF have default implementations that provide rich
+ functionality while requiring little or no integration work from the user.
+ .
+ This package contains the shared library.
+
+Package: libcef-dev
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ libcef (= ${binary:Version}) | libcefd (= ${binary:Version})
+Description: Chromium Embedded Framework - development files
+ Chromium Embedded Framework allows third-party applications to embed
+ the Chromium web browser. CEF insulates the user from the underlying Chromium
+ and Blink code complexity by offering production-quality stable APIs, release
+ branches tracking specific Chromium releases, and binary distributions.
+ Most features in CEF have default implementations that provide rich
+ functionality while requiring little or no integration work from the user.
+ .
+ This package contains the development files.

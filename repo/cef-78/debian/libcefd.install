@@ -1,0 +1,10 @@
+#!/usr/bin/dh-exec
+usr/lib/libcefd.so usr/lib/${DEB_BUILD_MULTIARCH}/
+usr/lib/cef.dbg/chrome-sandbox usr/lib/${DEB_BUILD_MULTIARCH}/
+usr/lib/cef.dbg/libEGL.so usr/lib/${DEB_BUILD_MULTIARCH}/cef/
+usr/lib/cef.dbg/libGLESv2.so usr/lib/${DEB_BUILD_MULTIARCH}/cef/
+usr/lib/cef.dbg/swiftshader/libEGL.so usr/lib/${DEB_BUILD_MULTIARCH}/swiftshader/
+usr/lib/cef.dbg/swiftshader/libGLESv2.so usr/lib/${DEB_BUILD_MULTIARCH}/swiftshader/
+usr/lib/cef.dbg/*.bin usr/lib/${DEB_BUILD_MULTIARCH}/
+usr/lib/cef.dbg/icudtl.dat usr/lib/${DEB_BUILD_MULTIARCH}/
+usr/share/cef/Resources/* usr/share/cef/Resources/

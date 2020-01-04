@@ -1,0 +1,10 @@
+--- a/cmake/cef_variables.cmake
++++ b/cmake/cef_variables.cmake
+@@ -92,6 +92,7 @@
+     -Wno-unused-parameter           # Don't warn about unused parameters
+     -Wno-error=comment              # Don't warn about code in comments
+     -Wno-comment                    # Don't warn about code in comments
++    -Wno-error=attributes           # Don't warn about unknown attributes
+     )
+   list(APPEND CEF_C_COMPILER_FLAGS
+     -std=c99                        # Use the C99 language standard

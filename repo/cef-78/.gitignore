@@ -1,0 +1,12 @@
+/cmake/
+/Debug/
+/include/
+/libcef_dll/
+/Release/
+/Resources/
+/tests/
+/CMakeLists.txt
+/LICENSE.txt
+/README.txt
+/cef_paths.gypi
+/cef_paths2.gypi

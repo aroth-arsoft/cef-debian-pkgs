@@ -1,0 +1,10 @@
+*.symbols
+*.substvars
+/files
+/libcef/
+/libcef-dev/
+/libcefd/
+/tmp/
+*.log
+/debhelper-build-stamp
+/.debhelper/
