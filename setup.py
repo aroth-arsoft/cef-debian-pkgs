@@ -170,6 +170,84 @@ def copy_and_overwrite(from_path, to_path):
     remove_obsolete_files(from_path, to_path, ignore=shutil.ignore_patterns('debian', '.pc', '.git*'))
     return ret
 
+def substVars(val, props, empty_vars=True):
+
+    DELIM_START = "${";
+    DELIM_STOP = "}"
+    DELIM_START_LEN = len(DELIM_START)
+    DELIM_STOP_LEN = len(DELIM_STOP)
+    changed = False
+    pattern = val
+    i = 0
+
+    while True:
+        # Find opening paren of variable substitution.
+        var_start = pattern.find(DELIM_START, i);
+        if var_start < 0:
+            dest = pattern;
+            return changed, dest;
+
+        # Find closing paren of variable substitution.
+        var_end = pattern.find(DELIM_STOP, var_start);
+        if var_end < 0:
+            return False;
+
+        key = pattern[var_start + DELIM_START_LEN: var_end]
+        replacement = ''
+
+        if key and key in props:
+            replacement = str(props[key])
+
+        if empty_vars or replacement:
+            # Substitute the variable with its value in place.
+            pattern = pattern[0:var_start] + replacement + pattern[var_end+DELIM_STOP_LEN:]
+            changed = True
+            # Move beyond the just substituted part.
+            i = var_start + len(replacement)
+        else:
+            # Nothing has been substituted, just move beyond the unexpanded variable.
+            i = var_end + DELIM_STOP_LEN
+    return changed, pattern
+
+def configure_file(src, dst, values={}, follow_symlinks=True, encoding='utf-8'):
+    ret = True
+    if not follow_symlinks and os.path.islink(src):
+        os.symlink(os.readlink(src), dst)
+    else:
+        with open(src, 'rb') as fsrc, open(dst, 'wb') as fdst:
+
+            for srcline in fsrc:
+                changed, dstline = substVars(srcline.decode(encoding), props=values, empty_vars=False)
+                if changed:
+                    fdst.write(dstline.encode(encoding))
+                else:
+                    fdst.write(srcline)
+            fsrc.close()
+            fdst.close()
+    return ret
+
+def copy_and_configure(from_path, to_path, values={}, ignore=None):
+    class _copy_and_configure:
+        def __init__(self, values):
+            self.values = values
+
+        def __call__(self, src, dst):
+            dstdir, dstbase = os.path.split(dst)
+            dstchanged, dstbase = substVars(dstbase, props=values)
+            if dstchanged:
+                dst = os.path.join(dstdir, dstbase)
+
+            configure_file(src, dst, values=self.values)
+            shutil.copystat(src, dst)
+    ret = False
+    try:
+        func = _copy_and_configure(values)
+        copytree(from_path, to_path, copy_function=func, ignore_existing_dst=True, ignore=ignore)
+        ret = True
+    except shutil.Error as e:
+        print('Copy failed: %s' % e, file=sys.stderr)
+    return ret
+
 def copyfile(src, dst):
     ret = False
     try:
@@ -510,6 +588,12 @@ class cef_package_update_app(object):
             repo_dir = os.path.join(self._repo_dir, name.lower())
             repo_ok = os.path.isdir(repo_dir)
 
+            repo_debian_dir = os.path.join(repo_dir, 'debian')
+
+            values = { 'cef:ABI': version }
+
+            copy_and_configure(self._debian_dir, repo_debian_dir, values=values, ignore=shutil.ignore_patterns('changelog', '.git*'))
+
             if basename is None:
                 if site_archive is None:
                     filename = name.lower()
@@ -672,7 +756,7 @@ class cef_package_update_app(object):
                 if no_upload:
                     args.append('--noput')
                 try:
-                    (sts, stdoutdata, stderrdata) = runcmdAndGetData(args=, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr, cwd=repo_dir)
+                    (sts, stdoutdata, stderrdata) = runcmdAndGetData(args=args, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr, cwd=repo_dir)
                     if sts != 0:
                         print('ppa_publish failed:\n%s' % stderrdata, file=sys.stderr)
                 except FileNotFoundError as ex:

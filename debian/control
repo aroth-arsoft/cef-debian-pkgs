@@ -1,4 +1,4 @@
-Source: cef
+Source: cef${cef:ABI}
 Section: libs
 Priority: optional
 Maintainer: Andreas Roth <aroth@arsoft-online.com>
@@ -32,10 +32,10 @@ Build-Depends: debhelper (>= 10), dh-exec, cmake, patchelf,
 Standards-Version: 4.1.2
 Homepage: https://bitbucket.org/chromiumembedded/cef/
 
-Package: libcef
+Package: libcef${cef:ABI}
 Architecture: amd64
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Conflicts: libcefd
+Conflicts: libcefd, libcefd${cef:ABI}
 Provides: libcef-abi-${cef:ABI}
 Description: Chromium Embedded Framework
  Chromium Embedded Framework allows third-party applications to embed
@@ -47,10 +47,10 @@ Description: Chromium Embedded Framework
  .
  This package contains the shared library.
 
-Package: libcefd
+Package: libcefd${cef:ABI}
 Architecture: amd64
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Conflicts: libcef
+Conflicts: libcef, libcef${cef:ABI}
 Provides: libcef-abi-${cef:ABI}
 Description: Chromium Embedded Framework - debug version
  Chromium Embedded Framework allows third-party applications to embed
@@ -62,10 +62,10 @@ Description: Chromium Embedded Framework - debug version
  .
  This package contains the shared library.
 
-Package: libcef-dev
+Package: libcef${cef:ABI}-dev
 Architecture: amd64
 Depends: ${shlibs:Depends}, ${misc:Depends},
- libcef (= ${binary:Version}) | libcefd (= ${binary:Version})
+ libcef${cef:ABI} (= ${binary:Version}) | libcefd${cef:ABI} (= ${binary:Version})
 Description: Chromium Embedded Framework - development files
  Chromium Embedded Framework allows third-party applications to embed
  the Chromium web browser. CEF insulates the user from the underlying Chromium

@@ -8,3 +8,10 @@
 *.log
 /debhelper-build-stamp
 /.debhelper/
+/libcef*-dev.links
+/libcef*.install
+/libcefd*.install
+/libcef*-dev.README.Debian
+/libcef*-dev.install
+/README.Debian
+/control

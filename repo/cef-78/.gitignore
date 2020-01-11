@@ -10,3 +10,4 @@
 /README.txt
 /cef_paths.gypi
 /cef_paths2.gypi
+/cef_install.cmake

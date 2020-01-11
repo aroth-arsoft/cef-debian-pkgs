@@ -1,4 +1,4 @@
-Source: cef
+Source: cef78
 Section: libs
 Priority: optional
 Maintainer: Andreas Roth <aroth@arsoft-online.com>
@@ -32,11 +32,11 @@ Build-Depends: debhelper (>= 10), dh-exec, cmake, patchelf,
 Standards-Version: 4.1.2
 Homepage: https://bitbucket.org/chromiumembedded/cef/
 
-Package: libcef
+Package: libcef78
 Architecture: amd64
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Conflicts: libcefd
-Provides: libcef-abi-${cef:ABI}
+Conflicts: libcefd, libcefd78
+Provides: libcef-abi-78
 Description: Chromium Embedded Framework
  Chromium Embedded Framework allows third-party applications to embed
  the Chromium web browser. CEF insulates the user from the underlying Chromium
@@ -47,11 +47,11 @@ Description: Chromium Embedded Framework
  .
  This package contains the shared library.
 
-Package: libcefd
+Package: libcefd78
 Architecture: amd64
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Conflicts: libcef
-Provides: libcef-abi-${cef:ABI}
+Conflicts: libcef, libcef78
+Provides: libcef-abi-78
 Description: Chromium Embedded Framework - debug version
  Chromium Embedded Framework allows third-party applications to embed
  the Chromium web browser. CEF insulates the user from the underlying Chromium
@@ -62,10 +62,10 @@ Description: Chromium Embedded Framework - debug version
  .
  This package contains the shared library.
 
-Package: libcef-dev
+Package: libcef78-dev
 Architecture: amd64
 Depends: ${shlibs:Depends}, ${misc:Depends},
- libcef (= ${binary:Version}) | libcefd (= ${binary:Version})
+ libcef78 (= ${binary:Version}) | libcefd78 (= ${binary:Version})
 Description: Chromium Embedded Framework - development files
  Chromium Embedded Framework allows third-party applications to embed
  the Chromium web browser. CEF insulates the user from the underlying Chromium
