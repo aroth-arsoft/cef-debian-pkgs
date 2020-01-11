@@ -1,26 +1,14 @@
-cef78 (78.3.9+gc7345f2+chromium-78.0.3904.108-78.0.3904.108-78.0.3904.108-78.0.3904.108-78.0.3904.3) eoan; urgency=medium
+cef78 (78.3.9+gc7345f2+chromium-78.0.3904.108-3) eoan; urgency=medium
 
   * Automatic update 78.3.9+gc7345f2+chromium-78.0.3904.108
 
- -- Andreas Roth <aroth@arsoft-online.com>  Sat, 11 Jan 2020 14:05:11 +0100
+ -- Andreas Roth <aroth@arsoft-online.com>  Sat, 11 Jan 2020 14:57:11 +0100
 
-cef78 (78.3.9+gc7345f2+chromium-78.0.3904.108-78.0.3904.108-78.0.3904.108-78.0.3904.2) eoan; urgency=medium
-
-  * Automatic update 78.3.9+gc7345f2+chromium-78.0.3904.108
-
- -- Andreas Roth <aroth@arsoft-online.com>  Sat, 11 Jan 2020 14:04:27 +0100
-
-cef78 (78.3.9+gc7345f2+chromium-78.0.3904.108-78.0.3904.108-78.0.3904.1) eoan; urgency=medium
+cef78 (78.3.9+gc7345f2+chromium-78.0.3904.108-2) eoan; urgency=medium
 
   * Automatic update 78.3.9+gc7345f2+chromium-78.0.3904.108
 
- -- Andreas Roth <aroth@arsoft-online.com>  Sat, 04 Jan 2020 16:06:04 +0100
-
-cef78 (78.3.9+gc7345f2+chromium-78.0.3904.108-78.0.3904.0) eoan; urgency=medium
-
-  * Automatic update 78.3.9+gc7345f2+chromium-78.0.3904.108
-
- -- Andreas Roth <aroth@arsoft-online.com>  Sat, 04 Jan 2020 13:15:53 +0100
+ -- Andreas Roth <aroth@arsoft-online.com>  Sat, 11 Jan 2020 14:56:50 +0100
 
 cef78 (78.3.9+gc7345f2+chromium-78.0.3904.108-1) eoan; urgency=medium
 

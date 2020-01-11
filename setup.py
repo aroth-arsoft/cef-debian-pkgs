@@ -695,15 +695,19 @@ class cef_package_update_app(object):
                             old_version = str(dch.version)
                             debian_package_orig_version = cef_version
                             new_version = debian_package_orig_version + '-'
+                            #print('old_version %s' % old_version)
+                            #print('new_version %s' % new_version)
                             if old_version.startswith(new_version):
-                                i = old_version.find('-')
+                                i = old_version.rfind('-')
                                 if i:
                                     debian_revision = old_version[i+1:] if i else 0
                             else:
                                 debian_revision = '0'
 
                             debian_revision = increment_debian_revision(debian_revision, strategy=details.get('debian-revision', 'major'))
+                            #print('debian_revision %s' % debian_revision)
                             new_version = new_version + debian_revision
+                            #print('new_version %s' % new_version)
 
                             debian_package_version = new_version
                             dch.new_block(
