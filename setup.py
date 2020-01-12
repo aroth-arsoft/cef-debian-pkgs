@@ -10,10 +10,35 @@ import re
 import os
 import os.path
 from zipfile import ZipFile, BadZipFile
+import copy
 import tarfile
 from arsoft.utils import *
 from arsoft.inifile import IniFile
 
+
+
+package_list = {
+    'cef-78': {
+        'version': 78,
+        'site': 'spotify',
+    },
+    'cef-79': {
+        'version': 79,
+        'site': 'spotify',
+        'disable': True,
+    },
+    }
+
+
+site_list = {
+    #http://opensource.spotify.com/cefbuilds/cef_binary_79.0.10%2Bge866a07%2Bchromium-79.0.3945.88_linux64.tar.bz2
+    'spotify': {
+        'archive': 'tar.bz2',
+        'platform': 'linux64',
+        'index': 'http://opensource.spotify.com/cefbuilds/index.html',
+        'download': 'http://opensource.spotify.com/cefbuilds/cef_binary_${last_build}_${platform}.${archive}',
+    },
+}
 
 def mkdir_p(path):
     try:
@@ -257,8 +282,99 @@ def copyfile(src, dst):
         print('Copy failed: %s' % e, file=sys.stderr)
     return ret
 
+class MyTarFile(tarfile.TarFile):
+    def extract(self, member, path="", set_attrs=True, *, numeric_owner=False, prefix=None):
+        """Extract a member from the archive to the current working directory,
+           using its full name. Its file information is extracted as accurately
+           as possible. `member' may be a filename or a TarInfo object. You can
+           specify a different directory using `path'. File attributes (owner,
+           mtime, mode) are set unless `set_attrs' is False. If `numeric_owner`
+           is True, only the numbers for user/group names are used and not
+           the names.
+        """
+        self._check("r")
 
-def extract_archive(archive, dest_dir, arcdir=None):
+        if isinstance(member, str):
+            tarinfo = self.getmember(member)
+        else:
+            tarinfo = member
+
+        #print('extract %s prefix=%s' % (tarinfo, prefix))
+
+        # Prepare the link target for makelink().
+        if tarinfo.islnk():
+            tarinfo._link_target = os.path.join(path, tarinfo.linkname)
+
+        try:
+            if prefix is None:
+                dst = os.path.join(path, tarinfo.name)
+            else:
+                tname = tarinfo.name[len(prefix):]
+                if tname and tname[0] == '/':
+                    tname = tname[1:]
+                dst = os.path.join(path, tname)
+            self._extract_member(tarinfo, dst,
+                                 set_attrs=set_attrs,
+                                 numeric_owner=numeric_owner)
+        except OSError as e:
+            if self.errorlevel > 0:
+                raise
+            else:
+                if e.filename is None:
+                    self._dbg(1, "tarfile: %s" % e.strerror)
+                else:
+                    self._dbg(1, "tarfile: %s %r" % (e.strerror, e.filename))
+        except tarfile.ExtractError as e:
+            if self.errorlevel > 1:
+                raise
+            else:
+                self._dbg(1, "tarfile: %s" % e)
+
+    def extract_all_to(self, path=".", members=None, *, numeric_owner=False, prefix=None):
+        """Extract all members from the archive to the current working
+           directory and set owner, modification time and permissions on
+           directories afterwards. `path' specifies a different directory
+           to extract to. `members' is optional and must be a subset of the
+           list returned by getmembers(). If `numeric_owner` is True, only
+           the numbers for user/group names are used and not the names.
+        """
+        directories = []
+        #print('extract_all_to prefix=%s' % prefix)
+
+        if members is None:
+            members = self
+
+        for tarinfo in members:
+            if prefix is not None:
+                if not tarinfo.name.startswith(prefix):
+                    continue
+            if tarinfo.isdir():
+                # Extract directories with a safe mode.
+                directories.append(tarinfo)
+                tarinfo = copy.copy(tarinfo)
+                tarinfo.mode = 0o700
+            # Do not set_attrs directories, as we will do that further down
+            self.extract(tarinfo, path, set_attrs=not tarinfo.isdir(),
+                         numeric_owner=numeric_owner, prefix=prefix)
+
+        # Reverse sort directories.
+        directories.sort(key=lambda a: a.name)
+        directories.reverse()
+
+        # Set correct owner, mtime and filemode on directories.
+        for tarinfo in directories:
+            dirpath = os.path.join(path, tarinfo.name)
+            try:
+                self.chown(tarinfo, dirpath, numeric_owner=numeric_owner)
+                self.utime(tarinfo, dirpath)
+                self.chmod(tarinfo, dirpath)
+            except ExtractError as e:
+                if self.errorlevel > 1:
+                    raise
+                else:
+                    self._dbg(1, "tarfile: %s" % e)
+
+def extract_archive(archive, dest_dir, prefix=None):
     ret = False
     b = os.path.basename(archive)
     b, last_ext = os.path.splitext(b)
@@ -274,31 +390,13 @@ def extract_archive(archive, dest_dir, arcdir=None):
         b, second_ext = os.path.splitext(b)
         if second_ext == '.tar':
             try:
-                with tarfile.open(archive, 'r') as tarObj:
+                with MyTarFile.open(archive, 'r') as tarObj:
+                    #tarObj.open(archive, 'r')
                     # Extract all the contents of tar file in different directory
-                    tarObj.extractall(dest_dir)
-                ret = True
+                    tarObj.extract_all_to(dest_dir, prefix=prefix)
+                    ret = True
             except tarfile.TarError as e:
                 print('Tar file %s error: %s' % (archive, e), file=sys.stderr)
-    #print('extract_archive ret->%s %i' % (archive, ret))
-        if ret and arcdir is not None:
-            d = os.path.join(dest_dir, arcdir)
-            if os.path.isdir(d):
-                for f in os.listdir(d):
-                    src = os.path.join(d, f)
-                    dst = os.path.join(dest_dir, f)
-                    try:
-                        if os.path.exists(dst):
-                            if os.path.isfile(dst):
-                                os.unlink(dst)
-                            else:
-                                rmdir_p(dst)
-                        os.rename(src, dst)
-                    except OSError as e:
-                        print('Tar file %s rename error: %s' % (archive, e), file=sys.stderr)
-                os.rmdir(d)
-            else:
-                ret = False
     return ret
 
 
@@ -340,30 +438,6 @@ def get_spotify_builds(url, platform='linux64'):
             print('HTTP Error %s: %s' % (url, e))
         pass
     return None
-
-
-package_list = {
-    'cef-78': {
-        'version': 78,
-        'site': 'spotify',
-    },
-    'cef-79': {
-        'version': 79,
-        'site': 'spotify',
-        'disable': True,
-    },
-    }
-
-
-site_list = {
-    #http://opensource.spotify.com/cefbuilds/cef_binary_79.0.10%2Bge866a07%2Bchromium-79.0.3945.88_linux64.tar.bz2
-    'spotify': {
-        'archive': 'tar.bz2',
-        'platform': 'linux64',
-        'index': 'http://opensource.spotify.com/cefbuilds/index.html',
-        'download': 'http://opensource.spotify.com/cefbuilds/cef_binary_${last_build}_${platform}.${archive}',
-    },
-}
 
 re_cef_version_h = re.compile(r'#define CEF_VERSION\s*[\'"]([a-zA-Z0-9\.+-]+)[\'"]')
 re_source_format = re.compile(r'([0-9]+.[0-9]+)\s*\((a-zA-Z)\)')
@@ -547,13 +621,20 @@ class cef_package_update_app(object):
                     pass
                 elif download_ok:
                     if extract:
-                        target_repo_dir = os.path.join(self._repo_dir, name.lower())
+                        repo_dir = os.path.join(self._repo_dir, name.lower())
 
-                        mkdir_p(target_repo_dir)
+                        mkdir_p(repo_dir)
 
                         # Extract all the contents of zip file in different directory
-                        if not extract_archive(dest, target_repo_dir):
-                            print('Failed to extract %s to %s' % (dest, target_repo_dir), file=sys.stderr)
+                        prefix = basename
+                        if site_archive and prefix.endswith(site_archive):
+                            prefix = prefix[:-len(site_archive) - 1]
+                        if self._verbose:
+                            print('Extract %s to %s (prefix %s)' % (dest, repo_dir, prefix))
+
+                        # Extract all the contents of zip file in different directory
+                        if not extract_archive(dest, repo_dir, prefix=prefix):
+                            print('Failed to extract %s to %s' % (dest, repo_dir), file=sys.stderr)
                             ret = False
                     else:
                         ret = True
@@ -628,12 +709,12 @@ class cef_package_update_app(object):
                         repo_ok = False
                     else:
                         # Extract all the contents of zip file in different directory
-                        arcdir = basename
-                        if site_archive and arcdir.endswith(site_archive):
-                            arcdir = arcdir[:-len(site_archive) - 1]
+                        prefix = basename
+                        if site_archive and prefix.endswith(site_archive):
+                            prefix = prefix[:-len(site_archive) - 1]
                         if self._verbose:
-                            print('Extract %s to %s' % (orig_file, repo_dir))
-                        if not extract_archive(orig_file, repo_dir, arcdir=arcdir):
+                            print('Extract %s to %s (prefix %s)' % (orig_file, repo_dir, prefix))
+                        if not extract_archive(orig_file, repo_dir, prefix=prefix):
                             print('Failed to extract %s to %s' % (orig_file, repo_dir), file=sys.stderr)
                             repo_ok = False
 
@@ -776,6 +857,7 @@ class cef_package_update_app(object):
         parser = argparse.ArgumentParser(description='update/generate CEF packages')
         parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='enable verbose output of this script.')
         parser.add_argument('-f', '--force', dest='force', action='store_true', help='force re-download of packages.')
+        parser.add_argument('-fe', '--force-extract', dest='force_extract', action='store_true', help='force override local source with downloaded package.')
         parser.add_argument('-l', '--list', dest='list', action='store_true', help='show list of all packages.')
         parser.add_argument('-np', '--no-publish', dest='no_publish', action='store_true', help='do not publish packages.')
         parser.add_argument('-d', '--download', dest='download', action='store_true', help='downloads the latest CEF binary packages.')
@@ -785,6 +867,7 @@ class cef_package_update_app(object):
         args = parser.parse_args()
         self._verbose = args.verbose
         self._force = args.force
+        self._force_extract = args.force_extract
         self._no_publish = args.no_publish
 
         base_dir = os.path.abspath(os.getcwd())
@@ -829,13 +912,12 @@ class cef_package_update_app(object):
         if args.list:
             ret = self._list()
         elif args.download:
-            if self._download_pkgs():
+            if self._download_pkgs(extract=self._force_extract):
                 ret = 0
             else:
                 ret = 1
         elif args.update:
-            #if self._download_pkgs():
-            if 1:
+            if self._download_pkgs(extract=self._force_extract):
                 if self._update_package_repo():
                     if self._no_publish:
                         ret = 0
