@@ -12,3 +12,4 @@
 /cef_paths2.gypi
 /cef_install.cmake
 /obj-x86_64-linux-gnu/
+/.pc/
